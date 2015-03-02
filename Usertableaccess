@@ -1,0 +1,84 @@
+package edu.louisville.servlets.assignment2;
+
+import javax.servlet.annotation.WebServlet;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+/**
+ * Servlet implementation class Usertableaccess
+ */
+@WebServlet("/Usertableaccess")
+
+
+public class Usertableaccess {
+public String LookupUser(String USERID, String PASSWORD) throws SQLException
+{
+Connection connection = null; 
+PreparedStatement statement = null; 
+ResultSet resultset = null;
+String name = "";
+String DRIVER = "com.ibm.db2.jcc.DB2Driver";
+String URL = "jdbc:db2://216.249.138.198:50000/y0luo004";
+String DBUserId="y0luo004";
+String DBPassword="Spring2015";
+String QUERY = "SELECT USERID FROM y0luo004.USERID WHERE USERID= ? and PASSWORD= ?";
+ try {
+ Class.forName(DRIVER).newInstance();
+ }
+ catch (InstantiationException e)
+ {
+    System.out.println("Driver class cannot be instantiated.\n");
+ }
+ catch (IllegalAccessException e)
+ {
+    System.out.println("Driver class cannot be accessed.\n");
+ }
+ catch (ClassNotFoundException e)
+ {
+    System.out.println("Driver class not found, please check the PATH" + " and CLASSPATH system variables to ensure they are correct.\n");
+ }
+ try
+ {
+ connection = DriverManager.getConnection(URL, DBUserId, DBPassword); 
+ }
+ catch (SQLException sqle)
+ {
+    System.out.println("Cannot get database connection: " + sqle.getMessage() + "\n");
+    sqle.printStackTrace();
+ }
+ try
+ {
+ statement = connection.prepareStatement(QUERY); 
+ statement.setString(1, USERID);
+ statement.setString(2, PASSWORD);
+ }
+ catch (SQLException sqle)
+ {
+    System.out.println("Error preparing statement: " + sqle.getMessage() + "\n");
+    sqle.printStackTrace();
+ }
+ try
+ {
+    resultset = statement.executeQuery();
+    if (resultset.next())
+    {
+        name = resultset.getString("USERID");
+    } // end if
+ }
+ catch (SQLException sqle)
+ {
+    System.out.println("Execute Query SQL Error: " + sqle.getMessage() + "\n");
+    sqle.printStackTrace();
+ }
+ finally 
+ {
+ if (resultset != null) resultset.close();
+ if (statement != null) statement.close();
+ if (connection != null) connection.close();
+ }
+ return name; 
+}
+}
